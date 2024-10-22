@@ -1,0 +1,7 @@
+<NAZWA>PAJ - Na jakiej kasie<\NAZWA><GRUPA>Brak<\GRUPA><SQL>SELECT        K.KasaId, KA.Nazwa, K.TowId AS Nr_towaru_ID, T.Skrot, K.KodWyslany AS Kod, K.Plu, K.FlagaExp
+FROM            KasTow AS K INNER JOIN
+                         Kasa AS KA ON K.KasaId = KA.KasaId INNER JOIN
+                         Towar AS T ON K.TowId = T.TowId
+-- WHERE        K.KodWyslany = '5902573009983'
+
+WHERE        K.KodWyslany = :KodTowaru<\SQL>

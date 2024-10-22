@@ -1,0 +1,67 @@
+<NAZWA>Paj_Godzinowy<\NAZWA><GRUPA>Brak<\GRUPA><SQL>DECLARE @cols NVARCHAR(MAX);
+DECLARE @query NVARCHAR(MAX);
+
+-- daty jako kolumny
+SELECT @cols = STRING_AGG(QUOTENAME(CAST(DokumentData AS NVARCHAR)), ',')
+WITHIN GROUP (ORDER BY CAST(DokumentData AS DATE))
+FROM (SELECT DISTINCT CAST(Data AS DATE) AS DokumentData 
+      FROM Dok  INNER JOIN DokKasa ON Dok.DokId = DokKasa.DokId 
+      WHERE 
+          Dok.Aktywny = 1
+AND Dok.TypDok IN(21, 52)
+      AND DokKasa.KasaId IN (:()M_Kasa(SELECT KasaId, Nazwa FROM Kasa WHERE Rodzaj = 3))
+      AND Dok.MagId IN (:()M_Magazyn(SELECT MagId, Nazwa FROM Magazyn))
+      AND Dok.Data >= :DATA1
+      AND Dok.Data <= :DATA2
+	 ) AS Dates;
+
+-- dynamiczne zapytanie PIVOT
+SET @query = '
+WITH CTE AS (
+    SELECT 
+        Dok.DokId,
+        CAST(Data AS DATE) AS DokumentData,  -- Tylko data
+        CAST(Param3 / 3600 AS INT) AS Godz,  -- Pe³na godzina (0-23)
+        Razem
+    FROM 
+        Dok   INNER JOIN DokKasa ON Dok.DokId = DokKasa.DokId 
+    WHERE 
+        Dok.Aktywny = 1
+AND Dok.TypDok IN(21, 52)
+   AND DokKasa.KasaId IN (:()M_Kasa(SELECT KasaId, Nazwa FROM Kasa WHERE Rodzaj = 3))
+    AND Dok.MagId IN (:()M_Magazyn(SELECT MagId, Nazwa FROM Magazyn))
+    AND Dok.Data >= ':DATA1'
+    AND Dok.Data <= ':DATA2'
+),
+Godziny AS (
+    -- Stworzenie pe³nej listy godzin od 0 do 23
+    SELECT TOP (24) ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) - 1 AS Godzina
+    FROM master..spt_values
+)
+SELECT 
+    Godzina, ' + @cols + '
+FROM 
+    Godziny G
+LEFT JOIN
+    (SELECT 
+        DokumentData, 
+        Godz, 
+        SUM(Razem) AS SumaWartosc
+     FROM CTE
+     GROUP BY 
+        DokumentData, 
+        Godz
+    ) AS S
+ON Godzina = S.Godz
+PIVOT
+(
+    SUM(SumaWartosc)
+    FOR DokumentData IN (' + @cols + ')
+) AS PivotTable
+ORDER BY 
+    Godzina;
+';
+
+-- 3. Wykonaj zapytanie
+EXEC sp_executesql @query;
+<\SQL>

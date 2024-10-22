@@ -1,0 +1,23 @@
+<NAZWA>PAJ - Ostatnie dokumenty<\NAZWA><GRUPA>Brak<\GRUPA><SQL>SELECT 
+       [Nazwa] AS Kasa
+	  ,(SELECT TOP (1) Dok.NrDok FROM Dok INNER JOIN DokKasa ON Dok.DokId = DokKasa.DokId INNER JOIN Kasa K2 ON DokKasa.KasaId = K2.KasaId 
+			WHERE ((K.Rodzaj = 3 AND TypDok = 21) OR (K.Rodzaj = 1 AND TypDok = 20)) AND K2.KasaId = K.KasaId ORDER BY Dok.Data DESC) AS [Ostatni Paragon]
+	  ,(SELECT TOP (1) convert(varchar, Dok.Data, 23) FROM Dok INNER JOIN DokKasa ON Dok.DokId = DokKasa.DokId INNER JOIN Kasa K2 ON DokKasa.KasaId = K2.KasaId 
+			WHERE ((K.Rodzaj = 3 AND TypDok = 21) OR (K.Rodzaj = 1 AND TypDok = 20)) AND K2.KasaId = K.KasaId ORDER BY Dok.Data DESC) AS [Data dokumentu]
+	  ,(SELECT TOP (1) Dok.Zmiana FROM Dok INNER JOIN DokKasa ON Dok.DokId = DokKasa.DokId INNER JOIN Kasa K2 ON DokKasa.KasaId = K2.KasaId 
+			WHERE ((K.Rodzaj = 3 AND TypDok = 21) OR (K.Rodzaj = 1 AND TypDok = 20)) AND K2.KasaId = K.KasaId ORDER BY Dok.Data DESC) AS [Ostatnia zmiana]
+	  ,(SELECT TOP (1) DATEDIFF(Hour, Dok.Zmiana, GETDATE()) FROM Dok INNER JOIN DokKasa ON Dok.DokId = DokKasa.DokId INNER JOIN Kasa K2 ON DokKasa.KasaId = K2.KasaId 
+			WHERE ((K.Rodzaj = 3 AND TypDok = 21) OR (K.Rodzaj = 1 AND TypDok = 20)) AND K2.KasaId = K.KasaId ORDER BY Dok.Data DESC) AS [Ile godzin temu]
+
+	  ,(SELECT TOP (1) Dok.NrDok FROM Dok INNER JOIN DokKasa ON Dok.DokId = DokKasa.DokId INNER JOIN Kasa K2 ON DokKasa.KasaId = K2.KasaId 
+			WHERE ((K.Rodzaj = 3 AND TypDok = 53)) AND K2.KasaId = K.KasaId ORDER BY Dok.Data DESC) AS [Ostatni Raport]
+	  ,(SELECT TOP (1) convert(varchar, Dok.Data, 23) FROM Dok INNER JOIN DokKasa ON Dok.DokId = DokKasa.DokId INNER JOIN Kasa K2 ON DokKasa.KasaId = K2.KasaId 
+			WHERE ((K.Rodzaj = 3 AND TypDok = 53)) AND K2.KasaId = K.KasaId ORDER BY Dok.Data DESC) AS [Data dokumentu]
+	  ,(SELECT TOP (1) Dok.Zmiana FROM Dok INNER JOIN DokKasa ON Dok.DokId = DokKasa.DokId INNER JOIN Kasa K2 ON DokKasa.KasaId = K2.KasaId 
+			WHERE ((K.Rodzaj = 3 AND TypDok = 53)) AND K2.KasaId = K.KasaId ORDER BY Dok.Data DESC) AS [Ostatnia zmiana]
+	  ,(SELECT TOP (1) DATEDIFF(Hour, Dok.Zmiana, GETDATE()) FROM Dok INNER JOIN DokKasa ON Dok.DokId = DokKasa.DokId INNER JOIN Kasa K2 ON DokKasa.KasaId = K2.KasaId 
+			WHERE ((K.Rodzaj = 3 AND TypDok = 53)) AND K2.KasaId = K.KasaId ORDER BY Dok.Data DESC) AS [Ile godzin temu]
+
+  FROM [dbo].[Kasa] K
+  WHERE Aktywny = 1 AND Rodzaj in(1,3)
+  ORDER BY Rodzaj, Numer<\SQL>

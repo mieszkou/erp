@@ -1,0 +1,12 @@
+<NAZWA>PAJ - zestawienie FZ<\NAZWA><GRUPA>Brak<\GRUPA><SQL>select 
+CONVERT(VARCHAR(10), D.Data, 102), D.NrDok, K.Nazwa as Nazwa_Kontrahenta, 
+FORMAT(D.Netto, 'N2') as Wartosc_Dok,
+(SELECT TOP (1) D2.NrDok FROM Dok D2 INNER JOIN Rozlicza R ON D2.DokId = R.DokId WHERE R.RozliczanyDokId = D.DokId) AS Nr_Faktury
+
+from Dok D, DokKontr DK, Kontrahent K
+where D.TypDok=2 and D.Aktywny=1 and DK.DokId=D.DokId and DK.KontrId=K.KontrId AND EXISTS(select P.DokId from PozDok P, Towar T where P.DokId=D.DokId and P.TowId=T.TowId and T.AsId=:()Asortyment(SELECT AsId, Nazwa FROM Asort ORDER BY Nazwa))
+
+ AND D.Data>=:DATA1 AND D.Data<=:DATA2
+ ORDER BY D.NrDok
+
+<\SQL>
